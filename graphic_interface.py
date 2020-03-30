@@ -51,21 +51,21 @@ class TetrisApp(object):
 
     def run(self):
         pygame.time.set_timer(pygame.USEREVENT + 1, config['delay'])
-        idx, column = self.logic.get_next_shape_version_and_column()
+        shape, column = self.logic.get_next_shape_version_and_column()
         upcoming_shape = self.logic.get_upcoming_shapes()
-        upcoming_shape = upcoming_shape[idx]
-        if not (0 <= column < Logic.N and column + len(upcoming_shape) < Logic.N):
+        # upcoming_shape = upcoming_shape[idx]
+        if not (0 <= column < Logic.N and column + len(shape) < Logic.N):
             return 0
-        while self.logic.move_down(upcoming_shape, [column, 0]):
+        while self.logic.move_down(shape, [column, 0]):
             self.draw_matrix(self.logic.screen)
             pygame.display.update()
             pygame.time.delay(100)
             rows_exploded = self.logic.check_for_rows_and_explode()
-            self.logic.score += Logic.SCORE_PER_ROW * Logic.COMBO ** rows_exploded
-            idx, column = self.logic.get_next_shape_version_and_column()
+            if rows_exploded>0:
+                self.logic.score += Logic.SCORE_PER_ROW * Logic.COMBO ** rows_exploded
+            shape, column = self.logic.get_next_shape_version_and_column()
             upcoming_shape = self.logic.get_upcoming_shapes()
-            upcoming_shape = upcoming_shape[idx]
-            if not (0 <= column < Logic.N and column + len(upcoming_shape) < Logic.N):
+            if not (0 <= column < Logic.N and column + len(shape) < Logic.N):
                 break
         pygame.time.delay(100)
         pygame.quit()
