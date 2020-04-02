@@ -41,8 +41,7 @@ class TetrisApp(object):
     def draw_matrix(self, matrix):
         for x in range(len(matrix)):
             for y in range(len(matrix[0])):
-                if matrix[x][y]:
-                    pygame.draw.rect(self.s,
+                pygame.draw.rect(self.s,
                                      colors[matrix[x][y]],
                                      (y * config['cell_size'],
                                       x * config['cell_size'],
@@ -56,17 +55,17 @@ class TetrisApp(object):
         # upcoming_shape = upcoming_shape[idx]
         if not (0 <= column < Logic.N and column + len(shape) < Logic.N):
             return 0
-        while self.logic.move_down(shape, [column, 0]):
+        while self.logic.move_down(shape, [0, column]):
             self.draw_matrix(self.logic.screen)
             pygame.display.update()
             pygame.time.delay(100)
             rows_exploded = self.logic.check_for_rows_and_explode()
             if rows_exploded>0:
                 self.logic.score += Logic.SCORE_PER_ROW * Logic.COMBO ** rows_exploded
+                pygame.time.delay(150)
             shape, column = self.logic.get_next_shape_version_and_column()
             upcoming_shape = self.logic.get_upcoming_shapes()
-            if not (0 <= column < Logic.N and column + len(shape) < Logic.N):
-                break
+            pygame.time.delay(100)
         pygame.time.delay(100)
         pygame.quit()
         return self.logic.score

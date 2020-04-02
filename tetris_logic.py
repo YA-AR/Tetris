@@ -59,18 +59,18 @@ class Logic:
         return i
 
     def move_down(self, shape, pos):
-        depths = self.check_depths(shape, pos)
+        depths = self.check_depths(shape,[ pos[1], pos[0]])
         if depths is None:
             return []
         min_d = min(depths)
-        ret = self.add_shape([pos[0], pos[1] + min_d], shape)
+        ret = self.add_shape([pos[1], pos[0]  + min_d], shape)
         return ret
 
 # changes screen according to the shape located
     def add_shape(self, pos, shape):
         pos_x = pos[0]
         pos_y = pos[1]
-
+        
         if pos_x + len(shape[0]) > Logic.N or pos_y + len(shape) > Logic.M or pos_x < 0 or pos_y < 0:
             return []
         i = pos_x
@@ -91,7 +91,7 @@ class Logic:
         pos_x = pos[0]
         pos_y = pos[1]
 
-        if pos_x + len(shape[0]) > Logic.M or pos_y + len(shape) > Logic.N:
+        if pos_y + len(shape) > Logic.M or pos_x < 0 or pos_y<0 or pos_x + len(shape[0]) > Logic.N:
             return None
 
         max_depths = [-1 for i in range(len(shape[0]))]
@@ -109,12 +109,12 @@ class Logic:
         return max_depths
 
     def chose_placement(self, weights, shapes, matrix):
-        min_cost = sum([abs(x) for x in weights]) * 10 ** 10
+        min_cost = sum([abs(x) for x in weights]) * (10 ** 10)
         min_i = -1
         min_shape = []
         for shape in shapes:
             for i in range(len(matrix[0])):
-                undo = self.move_down(shape, [i, 0])
+                undo = self.move_down(shape, [0, i])
                 if undo:
                     cost = S.get_cost(weights, matrix)
                     if cost < min_cost:
@@ -127,20 +127,19 @@ class Logic:
 
     def get_next_shape_version_and_column(self):
         cost, column, shape = self.chose_placement([1, 1, 1, 1, -10, 1, 1, 1, 1, 1], self.upcoming_shapes[0], self.screen)
-        print(column, shape)
         return shape, column
 
     def check_for_rows_and_explode(self):
         count = 0
         rows_exploded = 0
-        for i in range(len(self.screen)):
-            for j in range(len(self.screen[0])):
-                if self.screen[i][j] != 0:
-                    count += 1
-            if count == Logic.N:
-                self.screen.pop(i)
-                np.insert(self.screen, [0] * 10, 0)
-                rows_exploded += 1
-            count = 0
+        to_pop = []
+        for i, row in enumerate(self.screen):
+            if sum([1 if x > 0 else 0 for x in row]) == Logic.N:
+                to_pop.append(i - count)
+                count += 1
+        for i in to_pop:
+            self.screen.pop(i)
+            rows_exploded += 1
+        self.screen = [[0 for i in range(Logic.N)] for j in range(len(to_pop))] + self.screen
         return rows_exploded
 
