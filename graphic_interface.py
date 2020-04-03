@@ -21,22 +21,30 @@ colors = [
     (0, 220, 220)]
 
 
-class TetrisApp(object):
-    def __init__(self):
-        pygame.init()
+class TetrisApp:
+    def __init__(self, weights, flag = False):
+
+        self.draw = flag
+
+        if self.draw:
+            pygame.init()
+
         self.width = config['cell_size'] * config['cols']
         self.height = config['cell_size'] * config['rows']
-        self.logic = Logic()
-        self.s = pygame.display.set_mode((self.width, self.height))
-        colour = pygame.color.Color('#646400')
-        pygame.event.set_blocked(pygame.MOUSEMOTION)  # We do not need
+        self.logic = Logic(weights)
+        if self.draw:
+            self.s = pygame.display.set_mode((self.width, self.height))
+            colour = pygame.color.Color('#646400')
+            pygame.event.set_blocked(pygame.MOUSEMOTION)  # We do not need
         # mouse movement
         # events, so we
         # block them.
         self.init_game()
+        self.ret = self.run()
 
     def init_game(self):
-        self.draw_matrix(self.logic.screen)
+        if self.draw:
+            self.draw_matrix(self.logic.screen)
 
     def draw_matrix(self, matrix):
         for x in range(len(matrix)):
@@ -51,26 +59,32 @@ class TetrisApp(object):
     def run(self):
         pygame.time.set_timer(pygame.USEREVENT + 1, config['delay'])
         shape, column = self.logic.get_next_shape_version_and_column()
-        upcoming_shape = self.logic.get_upcoming_shapes()
-        # upcoming_shape = upcoming_shape[idx]
         if not (0 <= column < Logic.N and column + len(shape) < Logic.N):
             return 0
         while self.logic.move_down(shape, [0, column]):
-            self.draw_matrix(self.logic.screen)
-            pygame.display.update()
-            pygame.time.delay(100)
+            if self.draw:
+                self.draw_matrix(self.logic.screen)
+                pygame.display.update()
+                pygame.time.delay(50)
             rows_exploded = self.logic.check_for_rows_and_explode()
-            if rows_exploded>0:
+            if rows_exploded > 0:
                 self.logic.score += Logic.SCORE_PER_ROW * Logic.COMBO ** rows_exploded
-                pygame.time.delay(150)
+                if self.draw:
+                    pygame.time.delay(50)
             shape, column = self.logic.get_next_shape_version_and_column()
             upcoming_shape = self.logic.get_upcoming_shapes()
+            if self.draw:
+                pygame.time.delay(50)
+        if self.draw:
             pygame.time.delay(100)
-        pygame.time.delay(100)
-        pygame.quit()
+            pygame.quit()
         return self.logic.score
 
 
-if __name__ == '__main__':
-    App = TetrisApp()
-    print(App.run())
+def graphic(weights, draw):
+    a = TetrisApp(weights, draw)
+    return a.ret
+
+
+
+

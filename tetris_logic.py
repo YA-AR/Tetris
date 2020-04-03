@@ -4,8 +4,8 @@ import strategy_properties as S
 
 
 class Logic:
-    N = 7
-    M = 13
+    N = 10
+    M = 24
     SCORE_PER_ROW = 100
     COMBO = 2
     TETRIMINOS = {1: [[[1, 1, 1],
@@ -44,7 +44,7 @@ class Logic:
                                                            [0, 7],
                                                            [6, 7]]]}
 
-    def __init__(self):
+    def __init__(self, weights):
         self.screen = [[0 for i in range(Logic.N)] for j in range(Logic.M)]
         idx = [random.randrange(7) for i in range(3)]
         upcoming_shapes=[]
@@ -52,6 +52,7 @@ class Logic:
             upcoming_shapes.append(Logic.TETRIMINOS[idx[i]+1])
         self.upcoming_shapes = upcoming_shapes
         self.score = 0
+        self.weights = weights
 
     def get_upcoming_shapes(self):
         i = self.upcoming_shapes.pop(0)
@@ -126,7 +127,7 @@ class Logic:
         return min_cost, min_i, min_shape
 
     def get_next_shape_version_and_column(self):
-        cost, column, shape = self.chose_placement([1, 1, 1, 1, -10, 1, 1, 1, 1, 1], self.upcoming_shapes[0], self.screen)
+        cost, column, shape = self.chose_placement(self.weights, self.upcoming_shapes[0], self.screen)
         return shape, column
 
     def check_for_rows_and_explode(self):
